@@ -70,8 +70,7 @@ def main(
     if len(image_paths) == 0:
         raise FileNotFoundError(f'No image files found in {input_path}')
 
-    model = MoGeModel.from_pretrained(pretrained_model_name_or_path).to(device).eval()
-
+    model = MoGeModel.from_pretrained("/data2/liuzhi/3DGS_code/MoGe/weights/model.pt").to(device).eval()
     
     if not any([save_maps_, save_glb_, save_ply_]):
         warnings.warn('No output format specified. Defaults to saving all. Please use "--maps", "--glb", or "--ply" to specify the output.')
@@ -90,22 +89,22 @@ def main(
         points, depth, mask, intrinsics = output['points'].cpu().numpy(), output['depth'].cpu().numpy(), output['mask'].cpu().numpy(), output['intrinsics'].cpu().numpy()
         normals, normals_mask = utils3d.numpy.points_to_normals(points, mask=mask)
 
-        save_path = Path(output_path, image_path.relative_to(input_path).parent, image_path.stem)
+        save_path = Path(output_path, image_path.relative_to(input_path).parent, "sky_mask")
         save_path.mkdir(exist_ok=True, parents=True)
 
         # Save images / maps
         if save_maps_:
-            cv2.imwrite(str(save_path / 'image.jpg'), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
-            cv2.imwrite(str(save_path / 'depth_vis.png'), cv2.cvtColor(colorize_depth(depth), cv2.COLOR_RGB2BGR))
-            cv2.imwrite(str(save_path / 'depth.exr'), depth, [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT])
-            cv2.imwrite(str(save_path / 'mask.png'), (mask * 255).astype(np.uint8))
-            cv2.imwrite(str(save_path / 'points.exr'), cv2.cvtColor(points, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT])
-            fov_x, fov_y = utils3d.numpy.intrinsics_to_fov(intrinsics)
-            with open(save_path / 'fov.json', 'w') as f:
-                json.dump({
-                    'fov_x': round(float(np.rad2deg(fov_x)), 2),
-                    'fov_y': round(float(np.rad2deg(fov_y)), 2),
-                }, f)
+            # cv2.imwrite(str(save_path / 'image.jpg'), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+            # cv2.imwrite(str(save_path / 'depth_vis.png'), cv2.cvtColor(colorize_depth(depth), cv2.COLOR_RGB2BGR))
+            # cv2.imwrite(str(save_path / 'depth.exr'), depth, [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT])
+            cv2.imwrite(str(save_path / f'{image_path.stem}.png'), ((1 - mask) * 255).astype(np.uint8))
+            # cv2.imwrite(str(save_path / 'points.exr'), cv2.cvtColor(points, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT])
+            # fov_x, fov_y = utils3d.numpy.intrinsics_to_fov(intrinsics)
+            # with open(save_path / 'fov.json', 'w') as f:
+            #     json.dump({
+            #         'fov_x': round(float(np.rad2deg(fov_x)), 2),
+            #         'fov_y': round(float(np.rad2deg(fov_y)), 2),
+            #     }, f)
 
         # Export mesh & visulization
         if save_glb_ or save_ply_ or show:

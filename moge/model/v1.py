@@ -18,7 +18,7 @@ from huggingface_hub import hf_hub_download
 from ..utils.geometry_torch import normalized_view_plane_uv, recover_focal_shift, gaussian_blur_2d
 from .utils import wrap_dinov2_attention_with_sdpa, wrap_module_with_gradient_checkpointing, unwrap_module_with_gradient_checkpointing
 from ..utils.tools import timeit
-
+from typing import IO, Union, Optional, Dict, Any
 
 class ResidualConvBlock(nn.Module):  
     def __init__(self, in_channels: int, out_channels: int = None, hidden_channels: int = None, padding_mode: str = 'replicate', activation: Literal['relu', 'leaky_relu', 'silu', 'elu'] = 'relu', norm: Literal['group_norm', 'layer_norm'] = 'group_norm'):  
