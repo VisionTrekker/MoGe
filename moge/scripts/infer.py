@@ -76,6 +76,9 @@ def main(
         warnings.warn('No output format specified. Defaults to saving all. Please use "--maps", "--glb", or "--ply" to specify the output.')
         save_maps_ = save_glb_ = save_ply_ = True
 
+    save_glb_ = save_ply_ = False
+    print(f"[ save_maps_ = {save_maps_}, save_glb_ = {save_glb_}, save_ply_ = {save_ply_}, show = {show} ]")
+
     for image_path in (pbar := tqdm(image_paths, desc='Inference', disable=len(image_paths) <= 1)):
         image = cv2.cvtColor(cv2.imread(str(image_path)), cv2.COLOR_BGR2RGB)
         height, width = image.shape[:2]
